@@ -1,4 +1,4 @@
-# Random User App
+# Random User Ionic App
 
 using https://randomuser.me/ api
 
@@ -18,4 +18,4 @@ using https://randomuser.me/ api
 
 ## Demo
 
-![alt text](/public/demo/demo.gif)
+![demo.gif](/public/demo/demo.gif)
