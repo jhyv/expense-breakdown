@@ -1,9 +1,9 @@
-import { IonButton, IonCol, IonInput, IonItem, IonLabel, IonModal, IonRow } from '@ionic/react';
+import { IonButton, IonCol, IonInput, IonItem, IonLabel, IonModal, IonRow, IonSelect, IonSelectOption } from '@ionic/react';
 import './PersonModal.css';
 import { CommonModal, Person } from '../../../models';
 import { AppLayout } from '../..';
 import { useEffect, useState } from 'react';
-import { PersonStorage } from '../../../storage';
+import usePersonStore from '../../../store/person/person.store';
 
 interface PersonModalProps extends CommonModal { }
 
@@ -15,16 +15,15 @@ export const PersonModal: React.FC<PersonModalProps> = ({
 
     const [form, setForm] = useState<Person>({
         name: '',
+        gender: 'M'
     });
+    const savePerson = usePersonStore((state) => state.savePerson);
 
     const onSubmit = (e: any) => {
         e.preventDefault();
         if (!isEdit) {
-            //save person
-            if (form.name !== '') {
-                (new PersonStorage).save(form);
-                setState(false);
-            }
+            savePerson(form);
+            setState(false);
         }
     }
 
@@ -33,8 +32,13 @@ export const PersonModal: React.FC<PersonModalProps> = ({
     }
 
     useEffect(() => {
-        console.log('PersonModal form', form);
-    }, [form])
+        if (state) {
+            setForm({
+                name: '',
+                gender: 'M'
+            })
+        }
+    }, [state])
 
     return (
         <IonModal isOpen={state}>
@@ -47,12 +51,19 @@ export const PersonModal: React.FC<PersonModalProps> = ({
                     <div className='form-container'>
                         <IonItem>
                             <IonLabel position='floating'>Name</IonLabel>
-                            <IonInput type='text' onIonChange={(e) => onInputChange(e, 'name')} value={form.name} />
+                            <IonInput type='text' onIonInput={(e) => onInputChange(e, 'name')} value={form.name} required />
+                        </IonItem>
+                        <IonItem>
+                            <IonLabel position='floating'>Gender</IonLabel>
+                            <IonSelect onIonChange={(e) => onInputChange(e, 'gender')} value={form.gender} aria-required >
+                                <IonSelectOption value={'M'}>Male</IonSelectOption>
+                                <IonSelectOption value={'F'}>Female</IonSelectOption>
+                            </IonSelect>
                         </IonItem>
 
                         <IonRow className='ion-justify-content-end'>
                             <IonCol size='5'>
-                                <IonButton type='submit' expand='block' disabled={form.name === ''}>
+                                <IonButton type='submit' expand='block'>
                                     Submit
                                 </IonButton>
                             </IonCol>

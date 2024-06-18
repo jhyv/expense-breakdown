@@ -25,7 +25,7 @@ import './theme/main.css';
 import { ExpenseBreakdown } from './pages/expense-breakdown/ExpenseBreakdown';
 
 setupIonicReact({
-  mode: 'ios'
+  mode: 'md'
 });
 
 
