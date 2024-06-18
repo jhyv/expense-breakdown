@@ -21,8 +21,14 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
+import './theme/main.css';
+import { ExpenseBreakdown } from './pages/expense-breakdown/ExpenseBreakdown';
 
-setupIonicReact();
+setupIonicReact({
+  mode: 'ios'
+});
+
+
 
 const App: React.FC = () => (
   <IonApp>
@@ -31,8 +37,11 @@ const App: React.FC = () => (
         <Route exact path="/home">
           <Home />
         </Route>
+        <Route exact path="/expense-breakdown">
+          <ExpenseBreakdown />
+        </Route>
         <Route exact path="/">
-          <Redirect to="/home" />
+          <Redirect to="/expense-breakdown" />
         </Route>
       </IonRouterOutlet>
     </IonReactRouter>

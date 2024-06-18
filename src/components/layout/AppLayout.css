@@ -1,0 +1,7 @@
+.appHeader {
+    border-bottom: none;
+}
+
+.appHeader.no-border {
+    box-shadow: none;
+}
