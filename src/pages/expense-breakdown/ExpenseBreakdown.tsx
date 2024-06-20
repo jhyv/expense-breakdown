@@ -6,12 +6,17 @@ import { addOutline } from 'ionicons/icons'
 import usePersonStore from "../../store/person/person.store";
 import defaultImg from "../../assets/img/default.png";
 import altImg from "../../assets/img/woman.png";
+import useExpenseStore from "../../store/expense/expense.store";
+import { Expense } from "../../models";
+import { ExpenseItem } from "../../components/core/expense-item/ExpenseItem";
 
 interface ExpenseBreakdownProps { }
 export const ExpenseBreakdown: React.FC<ExpenseBreakdownProps> = () => {
     const [expenseModal, setExpenseModal] = useState(false);
     const [personModal, setPersonModal] = useState(false);
     const personList = usePersonStore((state) => state.personList);
+    const expenseList = useExpenseStore((state) => state.expenseList);
+
     const onAddExpenseClick = () => {
         setExpenseModal(true);
     }
@@ -22,7 +27,8 @@ export const ExpenseBreakdown: React.FC<ExpenseBreakdownProps> = () => {
 
     useEffect(() => {
         console.log('personList', personList);
-    }, [personList])
+        console.log('expenseList', expenseList);
+    }, [personList, expenseList])
 
     return (
         <AppLayout title="Expense Breakdown">
@@ -47,6 +53,13 @@ export const ExpenseBreakdown: React.FC<ExpenseBreakdownProps> = () => {
                                 </IonAvatar>
                                 <IonLabel>{person.name}</IonLabel>
                             </IonChip>
+                        ))
+                    }
+                </div>
+                <div className="expense-list">
+                    {
+                        expenseList.map((expense: Expense, index: number) => (
+                            <ExpenseItem expense={expense} key={`expenseItem${index}${expense.id}`} />
                         ))
                     }
                 </div>

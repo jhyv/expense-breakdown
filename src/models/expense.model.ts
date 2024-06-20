@@ -8,4 +8,5 @@ export interface Expense extends BaseModel {
     contributors: Person[];
     transaction_id: any;
     payer_id: any;
+    payer?: Person;
 }

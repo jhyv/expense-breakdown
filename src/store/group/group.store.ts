@@ -10,7 +10,7 @@ type GroupState = {
 };
 
 type GroupActions = {
-    saveExpense: (item: Group) => any
+    saveGroup: (item: Group) => any
 };
 
 const initialState: GroupState = {
@@ -20,10 +20,10 @@ const initialState: GroupState = {
 const persistStorage: StateStorage = ionicStorage;
 
 const storageOptions = {
-    name: 'expense.store',
+    name: 'group.store',
     storage: createJSONStorage(() => persistStorage),
     partialize: (state: GroupState & GroupActions) => ({
-        expenseList: state.groupList
+        groupList: state.groupList
     })
 }
 
@@ -31,7 +31,7 @@ const useGroupStore = create<GroupState & GroupActions>()(
     persist(
         immer((set) => ({
             ...initialState,
-            saveExpense: (item: Group) => {
+            saveGroup: (item: Group) => {
                 item.id = UUID.generateId();
                 item.createdAt = Date.now().toLocaleString('en');
                 item.updatedAt = Date.now().toLocaleString('en');

@@ -4,6 +4,7 @@ import { AppLayout } from '../../layout/AppLayout';
 import { useEffect, useState } from 'react';
 import { CommonModal, Expense, Person } from '../../../models';
 import usePersonStore from '../../../store/person/person.store';
+import useExpenseStore from '../../../store/expense/expense.store';
 
 interface ExpenseModalProps extends CommonModal {
     isEdit?: boolean;
@@ -12,6 +13,7 @@ interface ExpenseModalProps extends CommonModal {
 
 export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, isEdit }) => {
     const personList = usePersonStore((state) => state.personList);
+    const addExpense = useExpenseStore((state) => state.addExpense);
 
     const [form, setForm] = useState<Expense>({
         title: '',
@@ -28,7 +30,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, isE
                 setForm((oldVal) => ({
                     ...oldVal,
                     [input]: e.target.value,
-                    contributors: oldVal.contributors.filter((item) => item.id !== e.target.value)
+                    contributors: []
                 }));
             } else {
                 setForm((oldVal) => ({
@@ -60,16 +62,33 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, isE
 
     const onFormSubmit = (e: any) => {
         e.preventDefault();
+
+        if (form.payer_id !== 'all') {
+            const payer: Person | undefined = personList.find((item) => item.id === form.payer_id);
+            if (payer !== undefined) {
+                const expense: Expense = { ...form, payer };
+
+                addExpense(expense);
+                console.log('[onFormSubmit] submitted', expense);
+            }
+        } else {
+            const expense: Expense = { ...form, contributors: personList };
+            addExpense(expense);
+            console.log('[onFormSubmit] submitted', expense);
+        }
+
+        setState(false);
     }
 
     useIonViewDidEnter(() => {
-        console.log('Person Modal did enter');
+        console.log('Person Modal did enter', state);
+        console.log('[useIonViewDidEnter] form', form);
         if (state) {
             setForm({
                 title: '',
                 type: '',
                 amount: 0,
-                contributors: [],
+                contributors: personList,
                 payer_id: 'all',
                 transaction_id: ''
             });
@@ -96,7 +115,8 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, isE
 
                         <IonItem>
                             <IonLabel position='floating'>Amount</IonLabel>
-                            <IonInput type='number' value={form.amount} onIonInput={(e) => onInputChange(e, 'amount')} required />
+                            <IonInput type='number' value={form.amount} onIonInput={(e) => onInputChange(e, 'amount')} required clearOnEdit={true}
+                            />
                         </IonItem>
 
                         <IonItem>

@@ -4,4 +4,5 @@ export interface Person extends BaseModel {
     name: string;
     gender?: string;
     thumbnail?: string;
+    contribution?: number;
 }
