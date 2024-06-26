@@ -1,38 +1,53 @@
-import { useState } from 'react';
 import { Expense, Person } from '../../../models';
 import './ExpenseItem.css';
+import { IonButton, IonIcon, useIonAlert } from '@ionic/react';
+import { create, trashBinOutline } from 'ionicons/icons';
+import useExpenseStore from '../../../store/expense/expense.store';
 
 interface ExpenseItemProps {
-    expense: Expense
+    expense: Expense,
+    onEditClick: any,
 }
 
 export const ExpenseItem: React.FC<ExpenseItemProps> = ({
-    expense
+    expense,
+    onEditClick
 }) => {
+    const [presentAlert] = useIonAlert();
+    const removeExpense = useExpenseStore((state) => state.removeExpense);
 
-    const getBreakdown = () => {
-        if (expense.payer_id !== 'all') {
-            const contribution = expense.amount / (expense.contributors.length + 1);
+    const onDelete = () => {
+        presentAlert({
+            message: `Are you sure you want to delete ${expense.title}?`,
+            buttons: [
+                {
+                    text: 'Cancel',
+                    role: 'cancel'
+                },
+                {
+                    text: 'Delete',
+                    handler: () => {
+                        removeExpense(expense);
+                    }
+                }
+            ]
 
-            return expense.contributors.map((item: Person) => ({
-                ...item,
-                contribution
-            }));
-        } else {
-            const contribution = expense.amount / (expense.contributors.length);
-
-            return expense.contributors.map((item: Person) => ({
-                ...item,
-                contribution
-            }));
-        }
+        })
     }
-
-    const [breakdown, setBreakdown] = useState<any[]>(getBreakdown());
 
     return (
         <div className='expense-item-wrapper'>
-            <div className='expense-title'>{expense.title}</div>
+            <div className='expense-title'>
+                <div>{expense.title}</div>
+                <div className='expense-actions'>
+                    <IonButton fill='clear' color='primary' size='small' onClick={(e) => onEditClick(expense)}>
+                        <IonIcon icon={create}></IonIcon>
+                    </IonButton>
+                    <IonButton fill='clear' color='danger' size='small' onClick={onDelete}>
+                        <IonIcon icon={trashBinOutline}></IonIcon>
+                    </IonButton>
+                </div>
+            </div>
             <div className='expense-amount'>Amount: <span className='amount-value'>P {expense.amount}</span></div>
             {
                 expense.payer_id !== 'all' &&
@@ -40,7 +55,7 @@ export const ExpenseItem: React.FC<ExpenseItemProps> = ({
             }
             <div className='expense-breakdown'>
                 {
-                    breakdown.map((item: Person, index: number) => (
+                    expense.contributors.map((item: Person, index: number) => (
                         <div key={`breakdown-item-${index}${expense.id}`} className='expense-breakdown-item'>
                             <div>
                                 <div></div>

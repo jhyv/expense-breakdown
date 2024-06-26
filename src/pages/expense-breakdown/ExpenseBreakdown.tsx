@@ -1,6 +1,6 @@
 import { IonAvatar, IonButton, IonIcon, IonChip, IonLabel } from "@ionic/react";
 import './ExpenseBreakdown.css';
-import { AppLayout, ExpenseModal, PersonModal } from "../../components";
+import { AppLayout, ExpenseItem, ExpenseModal, PersonModal, SummaryContribution } from "../../components";
 import { useEffect, useState } from "react";
 import { addOutline } from 'ionicons/icons'
 import usePersonStore from "../../store/person/person.store";
@@ -8,16 +8,17 @@ import defaultImg from "../../assets/img/default.png";
 import altImg from "../../assets/img/woman.png";
 import useExpenseStore from "../../store/expense/expense.store";
 import { Expense } from "../../models";
-import { ExpenseItem } from "../../components/core/expense-item/ExpenseItem";
 
 interface ExpenseBreakdownProps { }
 export const ExpenseBreakdown: React.FC<ExpenseBreakdownProps> = () => {
     const [expenseModal, setExpenseModal] = useState(false);
+    const [expense, setExpense] = useState<Expense | null>(null);
     const [personModal, setPersonModal] = useState(false);
     const personList = usePersonStore((state) => state.personList);
     const expenseList = useExpenseStore((state) => state.expenseList);
 
     const onAddExpenseClick = () => {
+        setExpense(null);
         setExpenseModal(true);
     }
 
@@ -25,10 +26,21 @@ export const ExpenseBreakdown: React.FC<ExpenseBreakdownProps> = () => {
         setPersonModal(true);
     }
 
+    const onEditClick = (expense: Expense) => {
+        setExpense((oldState) => {
+            onAddExpenseClick();
+            return expense;
+        });
+    }
+
     useEffect(() => {
         console.log('personList', personList);
         console.log('expenseList', expenseList);
-    }, [personList, expenseList])
+    }, [personList, expenseList]);
+
+    const onExpenseModalClose = () => {
+        setExpense(null);
+    }
 
     return (
         <AppLayout title="Expense Breakdown">
@@ -44,6 +56,7 @@ export const ExpenseBreakdown: React.FC<ExpenseBreakdownProps> = () => {
                         Person
                     </IonButton>
                 </div>
+
                 <div className="person-list">
                     {
                         personList.map((person, index: number) => (
@@ -56,15 +69,24 @@ export const ExpenseBreakdown: React.FC<ExpenseBreakdownProps> = () => {
                         ))
                     }
                 </div>
+                {
+                    expenseList.length > 0 &&
+                    <>
+                        <h3>Summary</h3>
+                        <div className="summary-list">
+                            <SummaryContribution list={expenseList} />
+                        </div>
+                    </>
+                }
                 <div className="expense-list">
                     {
                         expenseList.map((expense: Expense, index: number) => (
-                            <ExpenseItem expense={expense} key={`expenseItem${index}${expense.id}`} />
+                            <ExpenseItem onEditClick={onEditClick} expense={expense} key={`expenseItem${index}${expense.id}`} />
                         ))
                     }
                 </div>
             </div>
-            <ExpenseModal state={expenseModal} setState={setExpenseModal} />
+            <ExpenseModal onModalClose={onExpenseModalClose} expense={expense} state={expenseModal} setState={setExpenseModal} />
             <PersonModal state={personModal} setState={setPersonModal} />
         </AppLayout>
     );

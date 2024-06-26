@@ -1,11 +1,11 @@
 import { IonButton, IonCol, IonInput, IonItem, IonLabel, IonModal, IonRow, IonSelect, IonSelectOption } from '@ionic/react';
 import './PersonModal.css';
-import { CommonModal, Person } from '../../../models';
+import { CommonModalProps, Person } from '../../../models';
 import { AppLayout } from '../..';
 import { useEffect, useState } from 'react';
 import usePersonStore from '../../../store/person/person.store';
 
-interface PersonModalProps extends CommonModal { }
+interface PersonModalProps extends CommonModalProps { }
 
 export const PersonModal: React.FC<PersonModalProps> = ({
     state,

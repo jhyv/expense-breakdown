@@ -6,6 +6,7 @@ import { UUID } from "../../utils/person.utils";
 import { Group } from "../../models";
 
 type GroupState = {
+    current: Group | null,
     groupList: Group[]
 };
 
@@ -14,6 +15,7 @@ type GroupActions = {
 };
 
 const initialState: GroupState = {
+    current: null,
     groupList: [],
 };
 
@@ -37,6 +39,12 @@ const useGroupStore = create<GroupState & GroupActions>()(
                 item.updatedAt = Date.now().toLocaleString('en');
 
                 set((state) => ({ groupList: [...state.groupList, item] }));
+            },
+            setGroup: (item: Group) => {
+                set((state) => ({ current: item }));
+            },
+            resetCurrentGroup: () => {
+                set((state) => ({ current: null }));
             }
         })),
         storageOptions

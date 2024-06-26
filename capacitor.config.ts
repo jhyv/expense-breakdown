@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'random-user',
+  appId: 'com.jhyv.expensebreakdown',
+  appName: 'expense-breakdown',
   webDir: 'dist',
   server: {
     androidScheme: 'https'

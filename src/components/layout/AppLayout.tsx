@@ -2,14 +2,21 @@ import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonPage, IonTitl
 import './AppLayout.css';
 import { closeOutline } from "ionicons/icons";
 
+interface CustomButton {
+    id?: string;
+    icon: any;
+    handler: () => any;
+}
+
 interface AppLayoutProps {
     title?: string;
     children?: React.ReactNode;
     hasCloseBtn?: boolean;
     onCloseClick?: any;
     classes?: string[];
+    customBtns?: CustomButton[]
 }
-export const AppLayout: React.FC<AppLayoutProps> = ({ children, title, hasCloseBtn, onCloseClick, classes }) => {
+export const AppLayout: React.FC<AppLayoutProps> = ({ children, title, hasCloseBtn, onCloseClick, classes, customBtns }) => {
     return (
         <IonPage>
             <IonHeader className={`appHeader ${classes?.join(' ')}`}>
@@ -21,6 +28,18 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, title, hasCloseB
                             <IonButton onClick={onCloseClick}>
                                 <IonIcon icon={closeOutline} />
                             </IonButton>
+                        </IonButtons>
+                    }
+                    {
+                        customBtns && customBtns?.length > 0 &&
+                        <IonButtons slot="end" >
+                            {
+                                customBtns.map((btn, index) => (
+                                    <IonButton onClick={btn.handler} key={`customBtn${index}`}>
+                                        <IonIcon icon={btn.icon} />
+                                    </IonButton>
+                                ))
+                            }
                         </IonButtons>
                     }
                 </IonToolbar>

@@ -1,19 +1,32 @@
-import { IonButton, IonCheckbox, IonCol, IonInput, IonItem, IonLabel, IonList, IonModal, IonRow, IonSelect, IonSelectOption, useIonViewDidEnter } from '@ionic/react';
+import { IonButton, IonCheckbox, IonCol, IonInput, IonItem, IonLabel, IonList, IonModal, IonRow, IonSelect, IonSelectOption, useIonToast, useIonViewDidEnter, useIonViewDidLeave } from '@ionic/react';
 import './ExpenseModal.css';
 import { AppLayout } from '../../layout/AppLayout';
 import { useEffect, useState } from 'react';
-import { CommonModal, Expense, Person } from '../../../models';
+import { CommonModalProps, Expense, Person } from '../../../models';
 import usePersonStore from '../../../store/person/person.store';
 import useExpenseStore from '../../../store/expense/expense.store';
 
-interface ExpenseModalProps extends CommonModal {
-    isEdit?: boolean;
+interface ExpenseModalProps extends CommonModalProps {
+    expense?: Expense | null;
     payers?: Person[];
+    onModalClose: () => any;
 }
 
-export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, isEdit }) => {
+export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, expense, onModalClose }) => {
     const personList = usePersonStore((state) => state.personList);
     const addExpense = useExpenseStore((state) => state.addExpense);
+    const updateExpense = useExpenseStore((state) => state.updateExpense);
+    const [isEdit, setIsEdit] = useState<boolean>(false);
+    const [present] = useIonToast();
+
+    const presentToast = (message: string, color: string = 'primary', position: 'top' | 'middle' | 'bottom' = 'top') => {
+        present({
+            message: message,
+            duration: 1500,
+            color,
+            position: position,
+        });
+    };
 
     const [form, setForm] = useState<Expense>({
         title: '',
@@ -62,19 +75,38 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, isE
 
     const onFormSubmit = (e: any) => {
         e.preventDefault();
+        if (isEdit) {
+            if (form.payer_id !== 'all') {
+                const payer: Person | undefined = personList.find((item) => item.id === form.payer_id);
+                if (payer !== undefined) {
+                    const newExpense: Expense = { ...form, payer };
+                    updateExpense(newExpense, expense?.id);
+                    console.log('[onFormSubmit] submitted', expense);
+                }
+            } else {
+                const newExpense: Expense = { ...form, contributors: personList };
+                updateExpense(newExpense, expense?.id);
+                console.log('[onFormSubmit] submitted', expense);
+            }
 
-        if (form.payer_id !== 'all') {
-            const payer: Person | undefined = personList.find((item) => item.id === form.payer_id);
-            if (payer !== undefined) {
-                const expense: Expense = { ...form, payer };
+            presentToast(`Expense was updated successfully!`);
+        } else {
 
+            if (form.payer_id !== 'all') {
+                const payer: Person | undefined = personList.find((item) => item.id === form.payer_id);
+                if (payer !== undefined) {
+                    const expense: Expense = { ...form, payer };
+
+                    addExpense(expense);
+                    console.log('[onFormSubmit] submitted', expense);
+                }
+            } else {
+                const expense: Expense = { ...form, contributors: personList };
                 addExpense(expense);
                 console.log('[onFormSubmit] submitted', expense);
             }
-        } else {
-            const expense: Expense = { ...form, contributors: personList };
-            addExpense(expense);
-            console.log('[onFormSubmit] submitted', expense);
+
+            presentToast(`Expense was saved successfully!`);
         }
 
         setState(false);
@@ -83,17 +115,42 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, isE
     useIonViewDidEnter(() => {
         console.log('Person Modal did enter', state);
         console.log('[useIonViewDidEnter] form', form);
-        if (state) {
-            setForm({
+        console.log('[useIonViewDidEnter] expense', expense);
+    });
+
+    useEffect(() => {
+        console.log('[useEffect] expense', expense);
+        if (expense) {
+            setForm(expense);
+            setIsEdit(true);
+        } else {
+            resetForm();
+        }
+    }, [expense]);
+
+    useIonViewDidLeave(() => {
+        resetForm();
+    });
+
+    const resetForm = () => {
+        setForm((oldState) => {
+
+            setIsEdit(false);
+            return {
                 title: '',
                 type: '',
                 amount: 0,
                 contributors: personList,
                 payer_id: 'all',
                 transaction_id: ''
-            });
-        }
-    });
+            };
+        });
+    }
+
+    const onCloseClick = () => {
+        setState(false);
+        onModalClose();
+    }
 
     useEffect(() => {
         console.log('form', form);
@@ -105,7 +162,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, isE
                 classes={['no-border']}
                 hasCloseBtn
                 title={isEdit ? 'Edit Expense' : 'Add Expense'}
-                onCloseClick={() => setState(false)}>
+                onCloseClick={onCloseClick}>
                 <form onSubmit={onFormSubmit}>
                     <div className='form-container'>
                         <IonItem>
@@ -153,9 +210,15 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, isE
 
                         <IonRow className='ion-justify-content-end'>
                             <IonCol size='5'>
-                                <IonButton type='submit' expand='block'>
-                                    Submit
-                                </IonButton>
+                                {
+                                    isEdit ?
+                                        <IonButton type='submit' expand='block'>
+                                            Save
+                                        </IonButton> :
+                                        <IonButton type='submit' expand='block'>
+                                            Submit
+                                        </IonButton>
+                                }
                             </IonCol>
                         </IonRow>
                     </div>

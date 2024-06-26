@@ -9,6 +9,7 @@ type PersonState = {
 };
 
 type PersonActions = {
+    getPerson: (id: any) => any,
     savePerson: (item: Person) => any,
     updatePerson: (item: Person, id: any) => any,
     reset: () => any,
@@ -30,8 +31,11 @@ const storageOptions = {
 
 const usePersonStore = create<PersonState & PersonActions>()(
     persist(
-        immer((set) => ({
+        immer((set, get) => ({
             ...initialState,
+            getPerson: (id: any) => {
+                return get().personList.find((person) => person.id === id);
+            },
             savePerson: (item: Person) => {
                 item.id = UUID.generateId();
 
