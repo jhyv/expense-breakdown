@@ -1,4 +1,4 @@
-import { IonAvatar, IonButton, IonIcon, IonChip, IonLabel } from "@ionic/react";
+import { IonAvatar, IonButton, IonIcon, IonChip, IonLabel, useIonRouter } from "@ionic/react";
 import './ExpenseBreakdown.css';
 import { AppLayout, ExpenseItem, ExpenseModal, PersonModal, SummaryContribution } from "../../components";
 import { useEffect, useState } from "react";
@@ -7,7 +7,8 @@ import usePersonStore from "../../store/person/person.store";
 import defaultImg from "../../assets/img/default.png";
 import altImg from "../../assets/img/woman.png";
 import useExpenseStore from "../../store/expense/expense.store";
-import { Expense } from "../../models";
+import { Expense, Group } from "../../models";
+import useGroupStore from "../../store/group/group.store";
 
 interface ExpenseBreakdownProps { }
 export const ExpenseBreakdown: React.FC<ExpenseBreakdownProps> = () => {
@@ -15,7 +16,19 @@ export const ExpenseBreakdown: React.FC<ExpenseBreakdownProps> = () => {
     const [expense, setExpense] = useState<Expense | null>(null);
     const [personModal, setPersonModal] = useState(false);
     const personList = usePersonStore((state) => state.personList);
-    const expenseList = useExpenseStore((state) => state.expenseList);
+    const getExpenses = useExpenseStore((state) => state.getExpenses);
+    const currentGroup: Group | null = useGroupStore((state) => state.current);
+    const router = useIonRouter();
+    console.log('routeInfo', router.routeInfo);
+
+    if (currentGroup === null) {
+        if (router.canGoBack()) {
+            router.goBack();
+        } else {
+        }
+    }
+
+    const expenseList = getExpenses(currentGroup!);
 
     const onAddExpenseClick = () => {
         setExpense(null);
@@ -43,7 +56,7 @@ export const ExpenseBreakdown: React.FC<ExpenseBreakdownProps> = () => {
     }
 
     return (
-        <AppLayout title="Expense Breakdown">
+        <AppLayout title={currentGroup?.title}>
             <div className="page-body">
                 <div className="section-title">Actions:</div>
                 <div className="section-actions">

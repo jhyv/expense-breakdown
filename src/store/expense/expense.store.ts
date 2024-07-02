@@ -1,5 +1,5 @@
 import { StateStorage, createJSONStorage, persist } from "zustand/middleware";
-import { Expense, Person } from "../../models";
+import { Expense, Group, Person } from "../../models";
 import ionicStorage from "../../storage/ionic.storage";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
@@ -10,6 +10,7 @@ type ExpenseState = {
 };
 
 type ExpenseActions = {
+    getExpenses: (group?: Group) => any;
     setExpenses: (expenses: Expense[]) => any;
     addExpense: (expense: Expense) => any;
     removeExpense: (expense: Expense) => any;
@@ -50,8 +51,14 @@ const getBreakdown = (exp: Expense) => {
 
 const useExpenseStore = create<ExpenseState & ExpenseActions>()(
     persist(
-        immer((set) => ({
+        immer((set, get) => ({
             ...initialState,
+            getExpenses: (group?: Group) => {
+                if (group)
+                    return get().expenseList.filter((exp) => exp.transaction_id === group.id);
+
+                return get().expenseList;
+            },
             setExpenses: (expenses: Expense[]) => {
                 set({ expenseList: expenses });
             },

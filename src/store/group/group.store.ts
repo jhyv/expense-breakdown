@@ -11,7 +11,10 @@ type GroupState = {
 };
 
 type GroupActions = {
-    saveGroup: (item: Group) => any
+    saveGroup: (item: Group) => any,
+    removeGroup: (item: Group) => any,
+    setGroup: (item: Group) => any,
+    resetCurrentGroup: () => any,
 };
 
 const initialState: GroupState = {
@@ -25,7 +28,8 @@ const storageOptions = {
     name: 'group.store',
     storage: createJSONStorage(() => persistStorage),
     partialize: (state: GroupState & GroupActions) => ({
-        groupList: state.groupList
+        groupList: state.groupList,
+        current: state.current
     })
 }
 
@@ -39,6 +43,9 @@ const useGroupStore = create<GroupState & GroupActions>()(
                 item.updatedAt = Date.now().toLocaleString('en');
 
                 set((state) => ({ groupList: [...state.groupList, item] }));
+            },
+            removeGroup: (item: Group) => {
+                set((state) => ({ groupList: state.groupList.filter(group => group.id !== item.id) }));
             },
             setGroup: (item: Group) => {
                 set((state) => ({ current: item }));

@@ -1,10 +1,11 @@
-import { IonButton, IonCheckbox, IonCol, IonInput, IonItem, IonLabel, IonList, IonModal, IonRow, IonSelect, IonSelectOption, useIonToast, useIonViewDidEnter, useIonViewDidLeave } from '@ionic/react';
+import { IonButton, IonCheckbox, IonCol, IonInput, IonItem, IonLabel, IonList, IonModal, IonRow, IonSelect, IonSelectOption, useIonToast, useIonViewDidEnter, useIonViewDidLeave, useIonViewWillLeave } from '@ionic/react';
 import './ExpenseModal.css';
 import { AppLayout } from '../../layout/AppLayout';
 import { useEffect, useState } from 'react';
 import { CommonModalProps, Expense, Person } from '../../../models';
 import usePersonStore from '../../../store/person/person.store';
 import useExpenseStore from '../../../store/expense/expense.store';
+import useGroupStore from '../../../store/group/group.store';
 
 interface ExpenseModalProps extends CommonModalProps {
     expense?: Expense | null;
@@ -36,6 +37,8 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, exp
         payer_id: 'all',
         transaction_id: ''
     });
+
+    const currentGroup = useGroupStore((state) => state.current);
 
     const onInputChange = (e: any, input: string) => {
         if (input === 'payer_id') {
@@ -95,13 +98,13 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, exp
             if (form.payer_id !== 'all') {
                 const payer: Person | undefined = personList.find((item) => item.id === form.payer_id);
                 if (payer !== undefined) {
-                    const expense: Expense = { ...form, payer };
+                    const expense: Expense = { ...form, payer, transaction_id: currentGroup?.id };
 
                     addExpense(expense);
                     console.log('[onFormSubmit] submitted', expense);
                 }
             } else {
-                const expense: Expense = { ...form, contributors: personList };
+                const expense: Expense = { ...form, contributors: personList, transaction_id: currentGroup?.id };
                 addExpense(expense);
                 console.log('[onFormSubmit] submitted', expense);
             }
@@ -128,7 +131,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, exp
         }
     }, [expense]);
 
-    useIonViewDidLeave(() => {
+    useIonViewWillLeave(() => {
         resetForm();
     });
 
@@ -156,6 +159,16 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, exp
         console.log('form', form);
     }, [form]);
 
+    useEffect(() => {
+        if (state) {
+            if (expense) {
+                setForm(expense);
+                setIsEdit(true);
+            } else {
+                resetForm();
+            }
+        }
+    }, [state]);
     return (
         <IonModal isOpen={state}>
             <AppLayout
@@ -172,7 +185,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, exp
 
                         <IonItem>
                             <IonLabel position='floating'>Amount</IonLabel>
-                            <IonInput type='number' value={form.amount} onIonInput={(e) => onInputChange(e, 'amount')} required clearOnEdit={true}
+                            <IonInput step="0.5" type='number' value={form.amount} onIonInput={(e) => onInputChange(e, 'amount')} clearOnEdit={true}
                             />
                         </IonItem>
 

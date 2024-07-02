@@ -7,4 +7,21 @@
 .contributor-item {
     padding: 8px 0;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.contributor-item.contribution-paid div,
+.contributor-item .amount .contribution-paid {
+    text-decoration: line-through;
+    opacity: 0.4;
+}
+
+.contributor-item .amount .contribution-paid {
+    font-size: 14px;
+}
+
+.contributor-item .amount .new-contribution {
+    margin-left: 10px;
 }

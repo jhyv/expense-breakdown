@@ -1,6 +1,6 @@
-import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar } from "@ionic/react"
+import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar, useIonRouter } from "@ionic/react"
 import './AppLayout.css';
-import { closeOutline } from "ionicons/icons";
+import { chevronBack, closeOutline } from "ionicons/icons";
 
 interface CustomButton {
     id?: string;
@@ -14,13 +14,28 @@ interface AppLayoutProps {
     hasCloseBtn?: boolean;
     onCloseClick?: any;
     classes?: string[];
-    customBtns?: CustomButton[]
+    customBtns?: CustomButton[];
+    basePage?: boolean;
 }
-export const AppLayout: React.FC<AppLayoutProps> = ({ children, title, hasCloseBtn, onCloseClick, classes, customBtns }) => {
+export const AppLayout: React.FC<AppLayoutProps> = ({ children, title, hasCloseBtn, onCloseClick, classes, customBtns, basePage }) => {
+    const router = useIonRouter();
+
+    const onBackBtnClick = () => {
+        router.goBack();
+    }
+
     return (
         <IonPage>
             <IonHeader className={`appHeader ${classes?.join(' ')}`}>
                 <IonToolbar>
+                    {
+                        !basePage && router.canGoBack() &&
+                        <IonButtons slot="start" >
+                            <IonButton onClick={onBackBtnClick}>
+                                <IonIcon icon={chevronBack} />
+                            </IonButton>
+                        </IonButtons>
+                    }
                     <IonTitle>{title}</IonTitle>
                     {
                         hasCloseBtn &&
