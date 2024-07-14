@@ -1,10 +1,11 @@
-import { IonAvatar, IonButton, IonIcon, IonChip, IonLabel, useIonRouter } from "@ionic/react";
+import { IonAvatar, IonIcon, IonChip, IonLabel, useIonRouter } from "@ionic/react";
 import './ExpenseBreakdown.css';
 import { AppLayout, ExpenseItem, ExpenseModal, PersonModal, SummaryContribution } from "../../components";
 import { useEffect, useState } from "react";
 import { addOutline } from 'ionicons/icons'
 import usePersonStore from "../../store/person/person.store";
 import defaultImg from "../../assets/img/default.png";
+import newImg from "../../assets/img/new.png";
 import altImg from "../../assets/img/woman.png";
 import useExpenseStore from "../../store/expense/expense.store";
 import { Expense, Group } from "../../models";
@@ -12,11 +13,20 @@ import useGroupStore from "../../store/group/group.store";
 
 interface ExpenseBreakdownProps { }
 export const ExpenseBreakdown: React.FC<ExpenseBreakdownProps> = () => {
+    const btnActions = [
+        {
+            icon: addOutline,
+            handler: () => {
+                onAddExpenseClick();
+            }
+        }
+    ]
     const [expenseModal, setExpenseModal] = useState(false);
     const [expense, setExpense] = useState<Expense | null>(null);
     const [personModal, setPersonModal] = useState(false);
     const personList = usePersonStore((state) => state.personList);
     const getExpenses = useExpenseStore((state) => state.getExpenses);
+    const expenses = useExpenseStore((state) => state.expenseList);
     const currentGroup: Group | null = useGroupStore((state) => state.current);
     const router = useIonRouter();
     console.log('routeInfo', router.routeInfo);
@@ -25,6 +35,7 @@ export const ExpenseBreakdown: React.FC<ExpenseBreakdownProps> = () => {
         if (router.canGoBack()) {
             router.goBack();
         } else {
+
         }
     }
 
@@ -49,27 +60,16 @@ export const ExpenseBreakdown: React.FC<ExpenseBreakdownProps> = () => {
     useEffect(() => {
         console.log('personList', personList);
         console.log('expenseList', expenseList);
-    }, [personList, expenseList]);
+        console.log('expenses', expenses);
+    }, [personList, expenseList, expenses]);
 
     const onExpenseModalClose = () => {
         setExpense(null);
     }
 
     return (
-        <AppLayout title={currentGroup?.title}>
+        <AppLayout title={currentGroup?.title} customBtns={btnActions}>
             <div className="page-body">
-                <div className="section-title">Actions:</div>
-                <div className="section-actions">
-                    <IonButton size="small" shape="round" onClick={onAddExpenseClick}>
-                        <IonIcon icon={addOutline} slot="start"></IonIcon>
-                        Expense
-                    </IonButton>
-                    <IonButton size="small" shape="round" color="secondary" onClick={onAddPersonClick}>
-                        <IonIcon icon={addOutline} slot="start"></IonIcon>
-                        Person
-                    </IonButton>
-                </div>
-
                 <div className="person-list">
                     {
                         personList.map((person, index: number) => (
@@ -81,6 +81,14 @@ export const ExpenseBreakdown: React.FC<ExpenseBreakdownProps> = () => {
                             </IonChip>
                         ))
                     }
+                    <IonChip className="person-item add-btn" onClick={onAddPersonClick}>
+                        <IonAvatar>
+                            <img src={newImg} alt='newImg' />
+                        </IonAvatar>
+                        <IonLabel>
+                            <IonIcon slot="start" icon={addOutline} />
+                        </IonLabel>
+                    </IonChip>
                 </div>
                 {
                     expenseList.length > 0 &&
@@ -91,6 +99,7 @@ export const ExpenseBreakdown: React.FC<ExpenseBreakdownProps> = () => {
                         </div>
                     </>
                 }
+                <h3>Expense Breakdown</h3>
                 <div className="expense-list">
                     {
                         expenseList.map((expense: Expense, index: number) => (

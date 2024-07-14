@@ -1,19 +1,24 @@
-import { addOutline } from 'ionicons/icons';
+import { addOutline, closeOutline, createOutline, ellipsisVerticalOutline, trashBinOutline } from 'ionicons/icons';
 import { AppLayout } from '../../components';
 import './Groups.css';
 import { GroupModal } from '../../components/modals/group-modal/GroupModal';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import useGroupStore from '../../store/group/group.store';
 import { Group } from '../../models';
-import { IonItem, IonLabel, IonThumbnail, useIonRouter, useIonViewDidEnter } from '@ionic/react';
+import { IonButton, IonIcon, IonItem, IonLabel, IonRippleEffect, IonThumbnail, useIonActionSheet, useIonAlert, useIonRouter, useIonViewDidEnter } from '@ionic/react';
 import { GROUP_ICON_LIST } from '../../constants';
+import { parseDate } from '../../utils';
 
 interface GroupsProps { }
 
 export const Groups: React.FC<GroupsProps> = () => {
     const [groupModal, setGroupModal] = useState(false);
+    const [currentGroup, setCurrentGroup] = useState<Group | null>(null);
     const navigate = useIonRouter();
-    const { groupList, setGroup, resetCurrentGroup } = useGroupStore(({ groupList, setGroup, resetCurrentGroup }) => ({ groupList, setGroup, resetCurrentGroup }));
+    const [present] = useIonActionSheet();
+    const [alertPresent] = useIonAlert();
+    const {
+        groupList, setGroup, resetCurrentGroup, removeGroup } = useGroupStore(({ groupList, setGroup, resetCurrentGroup, removeGroup }) => ({ groupList, setGroup, resetCurrentGroup, removeGroup }));
     const btns = [
         {
             icon: addOutline,
@@ -32,25 +37,85 @@ export const Groups: React.FC<GroupsProps> = () => {
         navigate.push('/expense-breakdown');
     }
 
+    const onOptionClick = (item: Group) => {
+        present({
+            header: 'Options',
+            buttons: [
+                {
+                    icon: createOutline,
+                    text: 'Edit',
+                    handler: () => {
+                        setCurrentGroup((oldVal) => {
+                            setGroupModal(true);
+                            return item;
+                        });
+                    }
+                },
+                {
+                    icon: trashBinOutline,
+                    text: 'Delete',
+                    handler: () => {
+                        alertPresent({
+                            message: `Are you sure you want to delete ${item.title}?`,
+                            buttons: [
+                                {
+                                    text: 'Cancel',
+                                    role: 'cancel'
+                                },
+                                {
+                                    text: 'Delete',
+                                    handler: () => {
+                                        removeGroup(item);
+                                    }
+                                },
+                            ]
+                        })
+                    }
+                },
+                {
+                    icon: closeOutline,
+                    text: 'Cancel',
+                    role: 'cancel'
+                }
+            ]
+        })
+    }
+
     useIonViewDidEnter(() => {
         resetCurrentGroup();
     }, []);
+
+
+    useEffect(() => {
+        console.log(groupList);
+    }, [groupList])
 
     return (
         <AppLayout basePage title="List" customBtns={btns}>
             {
                 groupList.map((group: Group, index) => (
-                    <IonItem key={`groupItem${group.id}${index}`} onClick={() => onGroupItemClick(group)}>
-                        <IonThumbnail slot='start'>
-                            <div className='icon-container'>
-                                {getIcon(group.icon)}
+                    <div className='ion-activatable ripple-parent group-item' key={`groupItem${group.id}${index}`}>
+                        <div className='group-item-info' onClick={() => onGroupItemClick(group)}>
+                            <IonThumbnail slot='start'>
+                                <div className='icon-container'>
+                                    {getIcon(group.icon)}
+                                </div>
+                            </IonThumbnail>
+                            <div>
+                                <IonLabel>{group.title}</IonLabel>
+                                <div className='group-item-date'>{parseDate(group.createdAt).format('LLL')}</div>
                             </div>
-                        </IonThumbnail>
-                        <IonLabel>{group.title}</IonLabel>
-                    </IonItem>
+                            <IonRippleEffect />
+                        </div>
+                        <div className='group-item-action'>
+                            <IonButton fill='clear' onClick={(e) => onOptionClick(group)}>
+                                <IonIcon icon={ellipsisVerticalOutline} />
+                            </IonButton>
+                        </div>
+                    </div>
                 ))
             }
-            <GroupModal state={groupModal} setState={setGroupModal} />
+            <GroupModal group={currentGroup} state={groupModal} setState={setGroupModal} />
         </AppLayout>
     );
 }

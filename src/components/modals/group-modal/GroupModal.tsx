@@ -2,21 +2,24 @@ import { IonButton, IonCol, IonInput, IonItem, IonLabel, IonModal, IonRow } from
 import { CommonModalProps, Group } from '../../../models';
 import './GroupModal.css';
 import { AppLayout } from '../../layout/AppLayout';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GROUP_ICON_LIST } from '../../../constants';
 import useGroupStore from '../../../store/group/group.store';
 
 interface GroupModalProps extends CommonModalProps {
-
+    group: Group | null
 }
 
 export const GroupModal: React.FC<GroupModalProps> = ({
     state,
-    isEdit,
-    setState
+    setState,
+    group
 }) => {
+    const [isEdit, setIsEdit] = useState<boolean>(false);
     const saveGroup = useGroupStore((state) => state.saveGroup);
+    const updateGroup = useGroupStore((state) => state.updateGroup);
     const [form, setForm] = useState<Group>({
+        id: '',
         title: '',
         icon: null
     });
@@ -28,20 +31,45 @@ export const GroupModal: React.FC<GroupModalProps> = ({
             [input]: value
         }));
     }
+
     const onClose = () => {
         setState(false);
     }
 
     const onFormSubmit = () => {
         if (form.title && form.icon) {
-            saveGroup(form);
+            if (isEdit) {
+                updateGroup(form, form.id);
+            } else {
+                saveGroup(form);
+            }
             onClose();
         }
     }
 
+    const resetForm = () => {
+        setForm({
+            title: '',
+            icon: null
+        });
+        setIsEdit(false);
+    }
+
+    useEffect(() => {
+        if (state) {
+            if (group) {
+                setForm(group);
+                setIsEdit(true);
+            } else {
+                resetForm();
+            }
+        }
+    }, [state]);
+
     return (
         <IonModal isOpen={state}>
             <AppLayout
+                basePage
                 classes={['no-border']}
                 hasCloseBtn
                 title={isEdit ? 'Edit Breakdown' : 'Add Breakdown'}
@@ -68,9 +96,15 @@ export const GroupModal: React.FC<GroupModalProps> = ({
 
                         <IonRow className='ion-justify-content-end'>
                             <IonCol size='5'>
-                                <IonButton type='submit' expand='block'>
-                                    Submit
-                                </IonButton>
+                                {
+                                    isEdit ?
+                                        <IonButton type='submit' expand='block'>
+                                            Save
+                                        </IonButton> :
+                                        <IonButton type='submit' expand='block'>
+                                            Submit
+                                        </IonButton>
+                                }
                             </IonCol>
                         </IonRow>
                     </div>

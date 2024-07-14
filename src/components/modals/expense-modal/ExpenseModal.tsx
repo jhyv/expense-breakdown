@@ -1,4 +1,4 @@
-import { IonButton, IonCheckbox, IonCol, IonInput, IonItem, IonLabel, IonList, IonModal, IonRow, IonSelect, IonSelectOption, useIonToast, useIonViewDidEnter, useIonViewDidLeave, useIonViewWillLeave } from '@ionic/react';
+import { IonButton, IonCheckbox, IonCol, IonInput, IonItem, IonLabel, IonList, IonModal, IonRow, IonSelect, IonSelectOption, IonToggle, useIonToast, useIonViewDidEnter, useIonViewDidLeave, useIonViewWillLeave } from '@ionic/react';
 import './ExpenseModal.css';
 import { AppLayout } from '../../layout/AppLayout';
 import { useEffect, useState } from 'react';
@@ -35,12 +35,14 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, exp
         amount: 0,
         contributors: personList,
         payer_id: 'all',
-        transaction_id: ''
+        transaction_id: '',
+        excludePayer: false,
     });
 
     const currentGroup = useGroupStore((state) => state.current);
 
     const onInputChange = (e: any, input: string) => {
+        console.log('[onInputChange] e', e);
         if (input === 'payer_id') {
             if (e.target.value !== 'all') {
                 setForm((oldVal) => ({
@@ -55,6 +57,9 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, exp
                     contributors: personList
                 }));
             }
+
+        } else if (input === 'excludePayer') {
+            setForm((oldVal) => ({ ...oldVal, [input]: e.detail.checked }));
 
         } else {
             setForm((oldVal) => ({ ...oldVal, [input]: e.target.value }));
@@ -145,7 +150,8 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, exp
                 amount: 0,
                 contributors: personList,
                 payer_id: 'all',
-                transaction_id: ''
+                transaction_id: '',
+                excludePayer: false,
             };
         });
     }
@@ -172,6 +178,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, exp
     return (
         <IonModal isOpen={state}>
             <AppLayout
+                basePage
                 classes={['no-border']}
                 hasCloseBtn
                 title={isEdit ? 'Edit Expense' : 'Add Expense'}
@@ -185,7 +192,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, exp
 
                         <IonItem>
                             <IonLabel position='floating'>Amount</IonLabel>
-                            <IonInput step="0.5" type='number' value={form.amount} onIonInput={(e) => onInputChange(e, 'amount')} clearOnEdit={true}
+                            <IonInput step="0.01" type='number' value={form.amount} onIonInput={(e) => onInputChange(e, 'amount')} clearOnEdit={true}
                             />
                         </IonItem>
 
@@ -204,6 +211,17 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ state, setState, exp
                                 }
                             </IonSelect>
                         </IonItem>
+                        {
+                            form.payer_id !== 'all' &&
+                            <IonItem>
+                                <IonToggle
+                                    checked={form.excludePayer}
+                                    onIonChange={(e) => onInputChange(e, 'excludePayer')}
+                                    labelPlacement='end'>
+                                    Exclude <b>payer</b> from contribution
+                                </IonToggle>
+                            </IonItem>
+                        }
                         <hr />
                         <IonLabel>Contributors</IonLabel>
                         <IonList>

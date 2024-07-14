@@ -4,3 +4,12 @@
 }
 
 .section-actions {}
+
+.person-item {
+    background-color: var(--ion-color-secondary-shade);
+}
+
+.person-item.add-btn {
+    background-color: var(--ion-color-light-shade);
+    color: var(--ion-color-dark);
+}

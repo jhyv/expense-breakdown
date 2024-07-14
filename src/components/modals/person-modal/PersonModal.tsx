@@ -12,7 +12,9 @@ export const PersonModal: React.FC<PersonModalProps> = ({
     setState,
     isEdit
 }) => {
+    const btnOptions = [
 
+    ];
     const [form, setForm] = useState<Person>({
         name: '',
         gender: 'M'
@@ -43,6 +45,7 @@ export const PersonModal: React.FC<PersonModalProps> = ({
     return (
         <IonModal isOpen={state}>
             <AppLayout
+                basePage
                 classes={['no-border']}
                 hasCloseBtn
                 title={isEdit ? 'Edit Person' : 'Add Person'}

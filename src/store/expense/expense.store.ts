@@ -4,6 +4,7 @@ import ionicStorage from "../../storage/ionic.storage";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { UUID } from "../../utils/person.utils";
+import { parseDate } from "../../utils";
 
 type ExpenseState = {
     expenseList: Expense[]
@@ -15,6 +16,7 @@ type ExpenseActions = {
     addExpense: (expense: Expense) => any;
     removeExpense: (expense: Expense) => any;
     updateExpense: (expense: Expense, id: any) => any;
+    removeExpenses: (expenses: Expense[]) => any;
 };
 
 const initialState = {
@@ -32,20 +34,29 @@ const storageOptions = {
 };
 
 const getBreakdown = (exp: Expense) => {
-    if (exp.payer_id !== 'all') {
-        const contribution = parseFloat(exp.amount.toString()) / (exp.contributors.length + 1);
-
-        return exp.contributors.map((item: Person) => ({
-            ...item,
-            contribution
-        }));
-    } else {
+    if (exp?.excludePayer) {
         const contribution = parseFloat(exp.amount.toString()) / (exp.contributors.length);
 
         return exp.contributors.map((item: Person) => ({
             ...item,
             contribution
         }));
+    } else {
+        if (exp.payer_id !== 'all') {
+            const contribution = parseFloat(exp.amount.toString()) / (exp.contributors.length + 1);
+
+            return exp.contributors.map((item: Person) => ({
+                ...item,
+                contribution
+            }));
+        } else {
+            const contribution = parseFloat(exp.amount.toString()) / (exp.contributors.length);
+
+            return exp.contributors.map((item: Person) => ({
+                ...item,
+                contribution
+            }));
+        }
     }
 }
 
@@ -66,8 +77,8 @@ const useExpenseStore = create<ExpenseState & ExpenseActions>()(
                 const item: Expense = {
                     ...expense,
                     id: UUID.generateId(),
-                    createdAt: Date.now().toLocaleString('en'),
-                    updatedAt: Date.now().toLocaleString('en'),
+                    createdAt: parseDate().format('YYYY-MM-DD'),
+                    updatedAt: parseDate().format('YYYY-MM-DD'),
                     contributors: getBreakdown(expense)
                 };
 
@@ -75,7 +86,11 @@ const useExpenseStore = create<ExpenseState & ExpenseActions>()(
                 set((state) => ({ expenseList: [...state.expenseList, item] }));
             },
             removeExpense: (expense: Expense) => {
-                set((state) => ({ expenseList: state.expenseList.filter(ex => ex.id !== expense.id) }));
+                set((state) => ({ expenseList: state.expenseList.filter(ex => ex.id !== expense?.id) }));
+            },
+            removeExpenses: (expenses: Expense[]) => {
+                const ids = expenses.map((item) => item.id);
+                set((state) => ({ expenseList: state.expenseList.filter(ex => ids.includes(ex.id)) }));
             },
             updateExpense: (expense: Expense, id: any) => {
                 set((state) => ({
@@ -83,7 +98,7 @@ const useExpenseStore = create<ExpenseState & ExpenseActions>()(
                         if (ex.id === expense.id) {
                             return {
                                 ...expense,
-                                updatedAt: Date.now().toLocaleString('en'),
+                                updatedAt: parseDate().format('YYYY-MM-DD'),
                                 contributors: getBreakdown(expense)
                             };
                         }

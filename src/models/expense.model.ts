@@ -9,4 +9,5 @@ export interface Expense extends BaseModel {
     transaction_id: any;
     payer_id: any;
     payer?: Person;
+    excludePayer?: boolean;
 }
