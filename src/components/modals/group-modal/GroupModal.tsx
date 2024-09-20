@@ -1,4 +1,4 @@
-import { IonButton, IonCol, IonInput, IonItem, IonLabel, IonModal, IonRow } from '@ionic/react';
+import { IonButton, IonCol, IonInput, IonItem, IonLabel, IonModal, IonRow, useIonViewWillLeave } from '@ionic/react';
 import { CommonModalProps, Group } from '../../../models';
 import './GroupModal.css';
 import { AppLayout } from '../../layout/AppLayout';
@@ -47,12 +47,20 @@ export const GroupModal: React.FC<GroupModalProps> = ({
         }
     }
 
+    useIonViewWillLeave(() => {
+        resetForm();
+    });
+
     const resetForm = () => {
-        setForm({
-            title: '',
-            icon: null
+        setForm((oldState) => {
+
+            setIsEdit(false);
+            return {
+                id: '',
+                title: '',
+                icon: null
+            };
         });
-        setIsEdit(false);
     }
 
     useEffect(() => {

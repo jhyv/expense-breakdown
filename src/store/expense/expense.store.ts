@@ -90,7 +90,7 @@ const useExpenseStore = create<ExpenseState & ExpenseActions>()(
             },
             removeExpenses: (expenses: Expense[]) => {
                 const ids = expenses.map((item) => item.id);
-                set((state) => ({ expenseList: state.expenseList.filter(ex => ids.includes(ex.id)) }));
+                set((state) => ({ expenseList: state.expenseList.filter(ex => !ids.includes(ex.id)) }));
             },
             updateExpense: (expense: Expense, id: any) => {
                 set((state) => ({

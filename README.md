@@ -1,20 +1,16 @@
-# Random User Ionic App
-
-using https://randomuser.me/ api
-
-## Setup
-
-### Clone the repository
-
-` git clone https://github.com/jhyv/random-user-ionic`
+# Expense Breakdown App
 
 ### Install dependencies
 
-` npm install`
+```
+npm install
+```
 
-## Run the app
+### Run the app
 
-`ionic serve`
+```
+ionic serve
+```
 
 ## Demo
 
