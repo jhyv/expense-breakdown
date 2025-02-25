@@ -36,7 +36,8 @@ export const GroupModal: React.FC<GroupModalProps> = ({
         setState(false);
     }
 
-    const onFormSubmit = () => {
+    const onFormSubmit = (e:any) => {
+        e.preventDefault();
         if (form.title && form.icon) {
             if (isEdit) {
                 updateGroup(form, form.id);
@@ -77,8 +78,7 @@ export const GroupModal: React.FC<GroupModalProps> = ({
                 <form onSubmit={onFormSubmit}>
                     <div className='form-container'>
                         <IonItem>
-                            <IonLabel position='floating'>Title</IonLabel>
-                            <IonInput type='text' value={form.title} onIonInput={(e: any) => onInputChange(e.target.value, 'title')} required />
+                            <IonInput label='Title' labelPlacement='floating' id='group-modal-input-text' type='text' value={form.title} onIonInput={(e: any) => onInputChange(e.target.value, 'title')} required />
                         </IonItem>
                         <br />
                         <IonItem lines='none'>

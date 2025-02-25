@@ -5,12 +5,16 @@ import { AppLayout } from '../..';
 import { useEffect, useState } from 'react';
 import usePersonStore from '../../../store/person/person.store';
 
-interface PersonModalProps extends CommonModalProps { }
+interface PersonModalProps extends CommonModalProps { 
+    currentPerson: Person | null;
+    resetPerson: () => any;
+}
 
 export const PersonModal: React.FC<PersonModalProps> = ({
     state,
     setState,
-    isEdit
+    currentPerson,
+    resetPerson
 }) => {
     const btnOptions = [
 
@@ -19,18 +23,35 @@ export const PersonModal: React.FC<PersonModalProps> = ({
         name: '',
         gender: 'M'
     });
-    const savePerson = usePersonStore((state) => state.savePerson);
+    const [isEdit, setIsEdit] = useState(false);
+    const {savePerson, updatePerson} = usePersonStore((state) => ({savePerson:state.savePerson, updatePerson: state.updatePerson}));
 
     const onSubmit = (e: any) => {
         e.preventDefault();
         if (!isEdit) {
             savePerson(form);
             setState(false);
+        } else {
+            updatePerson(form, currentPerson?.id);
+            setState(false);
         }
     }
 
     const onInputChange = (e: any, input: string) => {
         setForm((oldVal) => ({ ...oldVal, [input]: e.target.value }));
+    }
+
+    const onModalDidOpen = () => {
+        if(currentPerson) {
+            setForm(currentPerson);
+            setIsEdit(true);
+        }
+
+    }
+
+    const onModalDidClose = () => {
+        setIsEdit(false);
+        resetPerson();
     }
 
     useEffect(() => {
@@ -43,7 +64,7 @@ export const PersonModal: React.FC<PersonModalProps> = ({
     }, [state])
 
     return (
-        <IonModal isOpen={state}>
+        <IonModal isOpen={state} onIonModalDidDismiss={onModalDidClose} onIonModalDidPresent={onModalDidOpen}>
             <AppLayout
                 basePage
                 classes={['no-border']}

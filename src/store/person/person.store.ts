@@ -12,6 +12,7 @@ type PersonActions = {
     getPerson: (id: any) => any,
     savePerson: (item: Person) => any,
     updatePerson: (item: Person, id: any) => any,
+    removePerson: (item: Person) => any,
     reset: () => any,
 };
 
@@ -53,6 +54,9 @@ const usePersonStore = create<PersonState & PersonActions>()(
                         return i;
                     })
                 }));
+            },
+            removePerson: (item: Person) => {
+                return set((state) => ({ personList: state.personList.filter((person: Person) => person.id != item.id) }))
             },
             reset: () => {
                 set(initialState);
